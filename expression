@@ -75,12 +75,13 @@ public class ExpressionEvaluator {
             }
             else{
                 OperatorToken tok=(OperatorToken)token;
+                //If precedence of current operator is greater than the top operator, the stack is empty, or is an open parenthesis push to stack.
                 if(tok==OperatorToken.OPENPAR||stack.isEmpty()||tok!=OperatorToken.CLOSEDPAR&&stack.peek().precedence<tok.precedence){
                     if(tok!=OperatorToken.CLOSEDPAR) {
                         stack.push(tok);
                     }
                 }
-                //if closed parenthesis then pop until you are getting open parenthesis. pop opening parenthesis.
+                //if closed parenthesis then pop and insert into list until you are getting open parenthesis. pop opening parenthesis after.
                  else if(tok==OperatorToken.CLOSEDPAR){
                      while(!stack.isEmpty()&&stack.peek()!=OperatorToken.OPENPAR){
                          res.add(stack.pop());
@@ -98,6 +99,7 @@ public class ExpressionEvaluator {
                      continue;
                 }
                  else {
+                     //while the stack is not empty and the top of the stack has higher/equal precedence than current token, pop and add to the list.
 
                     while (!stack.isEmpty() && stack.peek().precedence >= tok.precedence && stack.peek() != OperatorToken.OPENPAR) {
                         res.add(stack.pop());
@@ -109,6 +111,9 @@ public class ExpressionEvaluator {
             }
         }
         while(!stack.isEmpty()){
+            if(stack.peek()==OperatorToken.OPENPAR){
+                throw new Exception("Invalid Parenthesis");
+            }
 
             res.add(stack.pop());
         }
@@ -226,8 +231,8 @@ public class ExpressionEvaluator {
                eval("( 4 + -2 ) * 7")));
     //    System.out.println(String.format("postfix notation for %s : %s", " 4 * ( 3 - 2 ) ) ** -2 ",
       //         convertToPostFix(parseExpr("  4 * ( 3 - 2 ) ) ** -2 "))));
- //       System.out.println(String.format("%s evaluated as %.4f", " 4 * ( 3 - 2 ) ) ** -2",
-//                  eval("  4 * ( 3 - 2 ) ) ** -2")));
+      // System.out.println(String.format("%s evaluated as %.4f", " 4 * ( 3 - 2 ) ) ** -2",
+       //         eval(" 4 * ( 3 - 2 ) ) ** -2")));
         try {
         System.out.println(String.format("postfix notation for %s : %s",
                 " ( ( 1.5 + 2.1 ) ** 2  - 7 ) * -1.4",
