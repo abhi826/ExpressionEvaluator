@@ -1,3 +1,4 @@
+
 package edu.njit.cs114;
 
 import java.util.ArrayList;
@@ -70,12 +71,13 @@ public class ExpressionEvaluator {
         List<ExpressionToken> res= new ArrayList<ExpressionToken>();
         Stack<OperatorToken> stack= new Stack<OperatorToken>();
         for(ExpressionToken token: infixExpr){
+            //if token is an operand, immediately push it into the stack.
             if(token instanceof OperandToken){
                 res.add(token);
             }
             else{
                 OperatorToken tok=(OperatorToken)token;
-                //If precedence of current operator is greater than the top operator, the stack is empty, or is an open parenthesis push to stack.
+                //If precedence of current operator is greater than the top operator, the stack is empty, or is an open parenthesis immediately push to stack.
                 if(tok==OperatorToken.OPENPAR||stack.isEmpty()||tok!=OperatorToken.CLOSEDPAR&&stack.peek().precedence<tok.precedence){
                     if(tok!=OperatorToken.CLOSEDPAR) {
                         stack.push(tok);
@@ -100,6 +102,7 @@ public class ExpressionEvaluator {
                 }
                  else {
                      //while the stack is not empty and the top of the stack has higher/equal precedence than current token, pop and add to the list.
+                    //stop popping when you get to an open parenthesis.
 
                     while (!stack.isEmpty() && stack.peek().precedence >= tok.precedence && stack.peek() != OperatorToken.OPENPAR) {
                         res.add(stack.pop());
@@ -202,7 +205,57 @@ public class ExpressionEvaluator {
         /**
          * For homework extra credit only!!
          */
-        return 0;
+        Stack<Double> operandStack= new Stack<Double>();
+        Stack<OperatorToken> operatorStack= new Stack<OperatorToken>();
+        for(ExpressionToken token: tokens){
+            if(token instanceof OperandToken){
+                OperandToken tok=(OperandToken)token;
+                operandStack.push(tok.getValue());
+            }
+            else{
+                OperatorToken tok= (OperatorToken)token;
+                if(tok==OperatorToken.OPENPAR||operatorStack.isEmpty()||tok!=OperatorToken.CLOSEDPAR&&tok.precedence>operatorStack.peek().precedence){
+                    if(tok!=OperatorToken.CLOSEDPAR) {
+                        operatorStack.push(tok);
+                    }
+                }
+                else if(tok==OperatorToken.CLOSEDPAR){
+                    while(operatorStack.peek()!=OperatorToken.OPENPAR){
+                        double num2=operandStack.pop();
+                        double num1= operandStack.pop();
+                        OperatorToken op=operatorStack.pop();
+                        double result=applyOp(op,num1,num2);
+                        operandStack.push(result);
+
+                    }
+                    if(operatorStack.peek()==OperatorToken.OPENPAR){
+                        operatorStack.pop();
+                    }
+                }
+                else{
+                    while(!operatorStack.isEmpty()&&tok.precedence<=operatorStack.peek().precedence&&operatorStack.peek()!=OperatorToken.OPENPAR){
+                        double num2=operandStack.pop();
+                        double num1= operandStack.pop();
+                        OperatorToken op=operatorStack.pop();
+                        double result=applyOp(op,num1,num2);
+                        operandStack.push(result);
+
+                    }
+                    operatorStack.push(tok);
+                }
+
+            }
+        }
+        while(!operatorStack.isEmpty()){
+            double num2=operandStack.pop();
+            double num1= operandStack.pop();
+            OperatorToken op=operatorStack.pop();
+            double result=applyOp(op,num1,num2);
+            operandStack.push(result);
+
+        }
+        double ans=operandStack.pop();
+        return ans;
     }
 
     public static void main(String [] args) throws Exception {
